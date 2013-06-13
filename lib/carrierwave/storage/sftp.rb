@@ -40,7 +40,7 @@ module CarrierWave
           size = nil
 
           connection do |sftp|
-            ###size = sftp.stat!(full_path).size
+            #####size = sftp.stat!(full_path).size
             size = sftp.stat(full_path).respond_to?(:size) ? sftp.stat!(full_path).size : 0
           end
 
