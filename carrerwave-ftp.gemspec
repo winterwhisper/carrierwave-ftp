@@ -1,18 +1,18 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "carrierwave/storage/ftp/version"
+require "carrierwave/storage/ftp_extend/version"
 
 Gem::Specification.new do |s|
-  s.name        = "carrierwave-ftp"
-  s.version     = Carrierwave::Storage::FTP::VERSION
+  s.name        = "carrierwave-ftp-extend"
+  s.version     = Carrierwave::Storage::FTPExtend::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Luan Santos"]
   s.email       = ["luan@luansantos.com"]
-  s.homepage    = "https://github.com/luan/carrierwave-ftp"
+  s.homepage    = "https://github.com/winterwhisper/carrierwave-ftp-extend"
   s.summary     = %q{FTP support for CarrierWave}
   s.description = %q{Allows file upload using FTP for CarrierWave uploaders.}
 
-  s.rubyforge_project = "carrierwave-ftp"
+  s.rubyforge_project = "carrierwave-ftp-extend"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
