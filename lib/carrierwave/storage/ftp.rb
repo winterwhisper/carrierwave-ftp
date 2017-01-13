@@ -37,6 +37,13 @@ module CarrierWave
           url.gsub(/.*\/(.*?$)/, '\1')
         end
 
+        def to_file
+          temp_file = Tempfile.new(filename)
+          temp_file.binmode
+          temp_file.write file.body
+          temp_file
+        end
+
         def size
           size = nil
 
@@ -74,21 +81,32 @@ module CarrierWave
 
         private
 
+        def use_ssl?
+          @uploader.ftp_url.start_with?('https')
+        end  
+
         def file
           require 'net/http'
           url = URI.parse(self.url)
           req = Net::HTTP::Get.new(url.path)
-          Net::HTTP.start(url.host, url.port) do |http|
+          Net::HTTP.start(url.host, url.port, :use_ssl => use_ssl?) do |http|
             http.request(req)
           end
         rescue
         end
 
         def connection
-          ftp = ExFTP.open(@uploader.ftp_host, @uploader.ftp_user, @uploader.ftp_passwd, @uploader.ftp_port)
-          ftp.passive = @uploader.ftp_passive
-          yield ftp
-          ftp.close
+          ftp = ExFTP.new
+          ftp.connect(@uploader.ftp_host, @uploader.ftp_port)
+
+          begin
+            ftp.passive = @uploader.ftp_passive
+            ftp.login(@uploader.ftp_user, @uploader.ftp_passwd)
+
+            yield ftp
+          ensure
+            ftp.quit
+          end
         end
       end
     end

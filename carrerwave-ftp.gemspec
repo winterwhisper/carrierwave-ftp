@@ -18,9 +18,10 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
+  s.license = 'MIT'
 
-  s.add_dependency "carrierwave", [">= 0.5.7"]
-  s.add_dependency "net-sftp", ["~> 2.0.5"]
-  s.add_development_dependency "rspec", ["~> 2.6"]
-  s.add_development_dependency "rake", ["~> 0.9"]
+  s.add_dependency "carrierwave", [">= 0.6.2"]
+  s.add_dependency "net-sftp", ["~> 2.1.2"]
+  s.add_development_dependency "rspec", ["~> 2.14"]
+  s.add_development_dependency "rake", ["~> 10.3"]
 end

@@ -20,7 +20,7 @@ describe CarrierWave::Storage::SFTP do
     end
 
     @file = CarrierWave::SanitizedFile.new(file_path('test.jpg'))
-    SftpUploader.stub!(:store_path).and_return('uploads/test.jpg')
+    SftpUploader.stub(:store_path).and_return('uploads/test.jpg')
     @storage = CarrierWave::Storage::SFTP.new(SftpUploader)
   end
 
@@ -50,6 +50,16 @@ describe CarrierWave::Storage::SFTP do
       sftp.stub(:upload!)
       sftp.stub(:close_channel)
       @stored = @storage.store!(@file)
+    end
+
+    it "should use the calculated URL when retrieving a file" do
+      @stored.should_receive(:url).and_return('http://example.com/')
+      @stored.read
+    end
+
+    it "should read file over https" do
+      @stored.should_receive(:url).and_return('https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Ruby_logo.svg/100px-Ruby_logo.svg.png')
+      @stored.read
     end
 
     it "returns a url based on directory" do
@@ -84,6 +94,11 @@ describe CarrierWave::Storage::SFTP do
     it "returns the size of the file" do
       @sftp.should_receive(:stat!).with('/home/test_user/public_html/uploads/test.jpg').and_return(Struct.new(:size).new(14))
       @stored.size.should == 14
+    end
+
+    it "returns to_file" do
+      @stored.should_receive(:file).and_return(Struct.new(:body).new('some content'))
+      @stored.to_file.size.should == 'some content'.length
     end
 
     it "returns the content of the file" do

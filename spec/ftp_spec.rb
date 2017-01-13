@@ -18,7 +18,7 @@ describe CarrierWave::Storage::FTP do
     end
 
     @file = CarrierWave::SanitizedFile.new(file_path('test.jpg'))
-    FtpUploader.stub!(:store_path).and_return('uploads/test.jpg')
+    FtpUploader.stub(:store_path).and_return('uploads/test.jpg')
     @storage = CarrierWave::Storage::FTP.new(FtpUploader)
   end
 
@@ -31,24 +31,28 @@ describe CarrierWave::Storage::FTP do
       21
     ]
 
-    Net::FTP.should_receive(:open).with(*ftp_params).and_return(ftp)
+    Net::FTP.should_receive(:new).and_return(ftp)
+    ftp.should_receive(:connect).with('ftp.testcarrierwave.dev', 21)
+    ftp.should_receive(:login).with('test_user', 'test_passwd')
     ftp.should_receive(:passive=).with(true)
     ftp.should_receive(:mkdir_p).with('~/public_html/uploads')
     ftp.should_receive(:chdir).with('~/public_html/uploads')
     ftp.should_receive(:put).with(@file.path, 'test.jpg')
-    ftp.should_receive(:close)
+    ftp.should_receive(:quit)
     @stored = @storage.store!(@file)
   end
 
   describe 'after upload' do
     before do
       ftp = double(:ftp_connection)
-      Net::FTP.stub(:open).and_return(ftp)
+      Net::FTP.stub(:new).and_return(ftp)
+      ftp.stub(:connect)
+      ftp.stub(:login)
       ftp.stub(:passive=)
       ftp.stub(:mkdir_p)
       ftp.stub(:chdir)
       ftp.stub(:put)
-      ftp.stub(:close)
+      ftp.stub(:quit)
       @stored = @storage.store!(@file)
     end
 
@@ -64,12 +68,14 @@ describe CarrierWave::Storage::FTP do
   describe 'other operations' do
     before do
       @ftp = double(:ftp_connection)
-      Net::FTP.stub(:open).and_return(@ftp)
+      Net::FTP.stub(:new).and_return(@ftp)
+      @ftp.stub(:connect)
+      @ftp.stub(:login)
       @ftp.stub(:passive=)
       @ftp.stub(:mkdir_p)
       @ftp.stub(:chdir)
       @ftp.stub(:put)
-      @ftp.stub(:close)
+      @ftp.stub(:quit)
       @stored = @storage.store!(@file)
     end
 
@@ -87,6 +93,11 @@ describe CarrierWave::Storage::FTP do
     it "returns the size of the file" do
       @ftp.should_receive(:size).and_return(14)
       @stored.size.should == 14
+    end
+
+    it "returns to_file" do
+      @stored.should_receive(:file).and_return(Struct.new(:body).new('some content'))
+      @stored.to_file.size.should == 'some content'.length
     end
 
     it "returns the content of the file" do
